@@ -5,24 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Part Request Portal</title>
     <style>
-        /* --- Global & Navigation Styles --- */
+        /* --- Global & Navigation Styles (Dark Mode) --- */
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b3b3b3;
+            --accent-primary: #0d6efd;
+            --accent-hover: #0a58ca;
+            --border-color: #444;
+            --success-color: #20c997;
+            --error-color: #fd4f59;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
         }
 
         nav {
-            background-color: #333;
+            background-color: var(--bg-secondary);
             padding: 1rem;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .nav-link {
-            color: white;
+            color: var(--text-primary);
             text-decoration: none;
             margin: 0 1rem;
             padding: 0.5rem 1rem;
@@ -32,11 +44,12 @@
         }
 
         .nav-link:hover {
-            background-color: #555;
+            background-color: #333;
         }
 
         .nav-link.active {
-            background-color: #007bff;
+            background-color: var(--accent-primary);
+            color: white;
         }
         
         main {
@@ -55,55 +68,50 @@
         }
         
         h1, h2 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
+            color: #f5f5f5;
+            border-bottom: 2px solid var(--accent-primary);
             padding-bottom: 0.3em;
             margin-top: 0;
         }
         
-        code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+        code { background: #333; padding: 2px 6px; border-radius: 4px; }
         
-        hr { margin: 2em 0; border: 0; border-top: 1px solid #ddd; }
+        hr { margin: 2em 0; border: 0; border-top: 1px solid var(--border-color); }
+
+        .important-note {
+            background-color: rgba(253, 79, 89, 0.1);
+            border-left: 4px solid var(--error-color);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: 4px;
+        }
+        .important-note p { margin: 0; }
+        .important-note strong { color: var(--error-color); }
+
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Page-Specific Styles --- */
+        /* --- Page-Specific Styles (Dark Mode) --- */
 
-        /* Instructions Page */
-        .instructions-container {
-             background: white;
+        /* Instructions & Setup Pages */
+        .content-container {
+             background: var(--bg-secondary);
              padding: 2rem;
              border-radius: 8px;
-             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+             border: 1px solid var(--border-color);
         }
-        .instructions-container ol {
-            padding-left: 20px;
-        }
-        .instructions-container li {
-            margin-bottom: 1rem;
-        }
+        .content-container ol { padding-left: 20px; }
+        .content-container li { margin-bottom: 1rem; }
 
         /* Uploader Page */
-        #uploaderPage {
-            display: none; /* Overridden by JS */
-            justify-content: center;
-            align-items: center;
-        }
-        #uploaderPage.active {
-            display: flex; /* Special case for centering */
-        }
-        .uploader-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
-        }
+        #uploaderPage { display: none; }
+        #uploaderPage.active { display: flex; justify-content: center; align-items: center; }
+        
+        .uploader-container { text-align: center; width: 100%; max-width: 450px; }
+        
         .uploader-container form {
             display: flex;
             flex-direction: column;
@@ -112,36 +120,30 @@
         }
         .uploader-container input[type="file"], .uploader-container select {
             padding: 0.75rem;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             width: 100%;
             max-width: 300px;
             box-sizing: border-box;
+            background-color: #333;
+            color: var(--text-primary);
         }
         .uploader-container button {
             padding: 0.75rem 1.5rem;
             border: none;
             border-radius: 4px;
-            background-color: #007bff;
+            background-color: var(--accent-primary);
             color: white;
             font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .uploader-container button:hover {
-            background-color: #0056b3;
-        }
+        .uploader-container button:hover { background-color: var(--accent-hover); }
         .message { margin-top: 1rem; font-weight: bold; }
-        .success { color: green; }
-        .error { color: red; }
+        .success { color: var(--success-color); }
+        .error { color: var(--error-color); }
 
-        /* Bookmarklet Setup Page */
-        .setup-instructions {
-            border: 1px solid #ddd;
-            padding: 1.5em;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
+        /* Bookmarklet Button */
         .drag-button {
             display: inline-block;
             padding: 12px 20px;
@@ -152,6 +154,7 @@
             font-weight: bold;
             cursor: move;
             border: 2px dashed #218838;
+            transition: background-color 0.2s;
         }
         .drag-button:hover { background-color: #218838; }
     </style>
@@ -166,36 +169,43 @@
 
     <main>
         <section id="instructionsPage" class="page active">
-            <div class="instructions-container">
+            <div class="content-container">
                 <h1>Complete Workflow ⚙️</h1>
-                <p>Follow these steps to save a product page and upload it for processing.</p>
+                <p>Follow these steps to save your parts list and upload it for processing.</p>
+
+                <div class="important-note">
+                    <p>
+                        <strong>Critical Instructions:</strong> This tool ONLY works for <strong>McMaster-Carr</strong> and <strong>Metal Supermarkets</strong>. You <strong>MUST</strong> save the HTML from the <strong>SHOPPING CART</strong> page. It will not work on a product page.
+                    </p>
+                </div>
+
                 <ol>
                     <li>
-                        <b>Go to the "Bookmarklet Setup" tab.</b><br>
-                        Click and drag the green "Save Clean HTML" button to your browser's bookmarks bar. You only need to do this once.
+                        <b>One-Time Setup: Go to the "Bookmarklet Setup" tab.</b><br>
+                        Click and drag the green "Save Clean HTML" button to your browser's bookmarks bar.
                     </li>
                     <li>
-                        <b>Navigate to a vendor product page.</b><br>
-                        Go to a product page on a site like McMaster-Carr or Metal Supermarkets.
+                        <b>Add parts to your cart on the vendor's website.</b><br>
+                        Go to either the McMaster-Carr or Metal Supermarkets website and add all desired items to your shopping cart.
                     </li>
                     <li>
-                        <b>Click the bookmarklet.</b><br>
-                        Click the "Save Clean HTML" button you just added to your bookmarks. A cleaned-up version of the page will be saved to your computer's Downloads folder.
+                        <b>Go to your shopping cart and click the bookmarklet.</b><br>
+                        Once on the cart page, click the "Save Clean HTML" button in your bookmarks bar. A cleaned-up HTML file of your cart will save to your computer's Downloads folder.
                     </li>
                     <li>
                         <b>Return here and go to the "Uploader" tab.</b><br>
                         Use the navigation bar at the top to switch to the uploader form.
                     </li>
                     <li>
-                        <b>Upload the file.</b><br>
-                        Choose the correct vendor, select the HTML file you just downloaded, and click "Submit Request".
+                        <b>Upload the cart file.</b><br>
+                        Choose the correct vendor, select the HTML file you just downloaded from your cart, and click "Submit Request".
                     </li>
                 </ol>
             </div>
         </section>
 
         <section id="uploaderPage" class="page">
-            <div class="uploader-container">
+            <div class="content-container uploader-container">
                 <h1>Upload Request File</h1>
                 <form id="uploadForm">
                     <div>
@@ -206,7 +216,7 @@
                         </select>
                     </div>
                     <div>
-                        <label for="file">Select an HTML file:</label><br>
+                        <label for="file">Select the Cart HTML file:</label><br>
                         <input type="file" name="file" id="file" accept=".html,.htm" required>
                     </div>
                     <button type="submit">Submit Request</button>
@@ -216,22 +226,25 @@
         </section>
 
         <section id="setupPage" class="page">
-            <h1>Ultimate HTML Cleaner Setup</h1>
-            <div class="setup-instructions">
+             <div class="content-container">
+                <h1>Bookmarklet Setup</h1>
                 <h2>Instructions:</h2>
-                <p><b>Step 1:</b> Make sure your bookmarks bar is visible. If you don't see it, press
+                <p><b>Step 1:</b> Make your bookmarks bar visible. If you don't see it, press
                     <code>Ctrl+Shift+B</code> (Windows/Chrome) or <code>Cmd+Shift+B</code> (Mac).
                 </p>
-                <p><b>Step 2:</b> Click and drag the green button below up to your bookmarks bar and release it. This creates a new bookmarklet. </p>
+                <p><b>Step 2:</b> Click and drag the green button below up to your bookmarks bar. This creates the bookmarklet. </p>
                 <p style="text-align: center; margin-top: 2em;">
                     <a class="drag-button" href="javascript:(()=>{const docClone=document.documentElement.cloneNode(true);const selectorsToRemove='script,style,link[rel=\'stylesheet\'],iframe,img,svg,video,audio,picture,noscript';docClone.querySelectorAll(selectorsToRemove).forEach(el=>el.remove());docClone.querySelectorAll('[style]').forEach(el=>el.removeAttribute('style'));docClone.querySelectorAll('*').forEach(el=>{for(const attr of[...el.attributes]){if(attr.name.startsWith('on')){el.removeAttribute(attr.name)}}});const cleanHtml=docClone.outerHTML;const partNumEl=document.querySelector('.part-number-and-spec-header--part-number');const fileName=partNumEl?partNumEl.innerText.trim():document.title;const blob=new Blob([cleanHtml],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${fileName} (Clean).html`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);alert('Cleaned HTML has been saved!');})();">Save Clean HTML</a>
                 </p>
             </div>
             <hr>
-            <h2>How to Use It</h2>
-            <p>1. Navigate to any product page (e.g., McMaster-Carr).</p>
-            <p>2. Click the "Save Clean HTML" button in your bookmarks bar.</p>
-            <p>3. A lightweight, cleaned-up version of the page's HTML will be saved to your Downloads folder.</p>
+            <div class="content-container">
+                <h2>How to Use It</h2>
+                <p>1. Add items to your cart on McMaster-Carr or Metal Supermarkets.</p>
+                <p>2. Go to your <strong>shopping cart page</strong>.</p>
+                <p>3. Click the "Save Clean HTML" button in your bookmarks bar.</p>
+                <p>4. A cleaned-up version of your cart will be saved to your Downloads folder.</p>
+            </div>
         </section>
     </main>
 
@@ -246,15 +259,9 @@
                     e.preventDefault();
                     const targetId = this.getAttribute('data-target');
 
-                    // Update active state for pages
-                    pages.forEach(page => {
-                        page.classList.remove('active');
-                        if (page.id === targetId) {
-                            page.classList.add('active');
-                        }
-                    });
+                    pages.forEach(page => page.classList.remove('active'));
+                    document.getElementById(targetId).classList.add('active');
 
-                    // Update active state for nav links
                     navLinks.forEach(navLink => navLink.classList.remove('active'));
                     this.classList.add('active');
                 });
@@ -263,7 +270,7 @@
 
         // --- File Uploader Logic ---
         document.getElementById("uploadForm").addEventListener("submit", async function(e) {
-            e.preventDefault(); // ⛔ Prevent default form submission
+            e.preventDefault();
 
             const fileInput = document.getElementById("file");
             const vendorSelect = document.getElementById("vendor");
@@ -282,11 +289,9 @@
             messageDiv.innerHTML = "<p>Uploading...</p>";
 
             try {
-                // NOTE: The endpoint URL must be a real, functioning server capable of handling file uploads.
                 const response = await fetch("https://add.orionsoftware.systems/request", {
                     method: "POST",
                     body: formData,
-                    // Browser automatically sets Content-Type for FormData with the correct boundary
                 });
 
                 if (response.ok) {
