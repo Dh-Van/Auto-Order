@@ -110,6 +110,14 @@
         .uploader-container { text-align: center; width: 100%; max-width: 450px; }
         .uploader-container form { display: flex; flex-direction: column; gap: 1.5rem; }
         .form-group { text-align: left; }
+
+        /* NEW STYLE: Added a generic label style */
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
         
         .drop-zone {
             border: 2px dashed var(--border-color);
@@ -132,7 +140,8 @@
             gap: 1rem;
         }
         
-        .uploader-container select {
+        /* UPDATED STYLE: Applied to both text input and select for consistency */
+        .uploader-container select, .uploader-container input[type="text"] {
             padding: 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: 4px;
@@ -140,6 +149,7 @@
             box-sizing: border-box;
             background-color: #333;
             color: var(--text-primary);
+            font-size: 1rem;
         }
         
         .uploader-container button {
@@ -228,7 +238,7 @@
                     </li>
                     <li>
                         <b>Upload the cart file.</b><br>
-                        Choose the correct vendor, select the HTML file you just downloaded from your cart, and click "Submit Request".
+                        Fill in your name and subteam, choose the correct vendor, select the HTML file you just downloaded, and click "Submit Request".
                     </li>
                 </ol>
             </div>
@@ -239,7 +249,25 @@
                 <h1>Upload Request File</h1>
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="vendor">1. Choose a vendor:</label>
+                        <label for="name">Your Name:</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subteam">Subteam:</label>
+                        <select name="subteam" id="subteam" required>
+                            <option value="" disabled selected>Select a Subteam</option>
+                            <option value="Chassis">Chassis</option>
+                            <option value="Suspension">Suspension</option>
+                            <option value="Drivetrain">Drivetrain</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendor">Vendor:</label>
                         <select name="vendor" id="vendor" required>
                             <option value="McMaster">McMaster-Carr</option>
                             <option value="MetalSupermarkets">Metal Supermarkets</option>
@@ -247,7 +275,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>2. Select the Cart HTML file:</label>
+                        <label>Cart HTML File:</label>
                         <div class="drop-zone" id="dropZone">
                             <span class="drop-zone__prompt">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
@@ -291,8 +319,8 @@
     </main>
 
     <script>
-        // --- Page Navigation Logic ---
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Page Navigation Logic ---
             const navLinks = document.querySelectorAll('.nav-link');
             const pages = document.querySelectorAll('.page');
 
@@ -307,6 +335,29 @@
                     navLinks.forEach(navLink => navLink.classList.remove('active'));
                     this.classList.add('active');
                 });
+            });
+
+            // --- NEW: Logic for persistent form data ---
+            const nameInput = document.getElementById('name');
+            const subteamSelect = document.getElementById('subteam');
+
+            // On page load, try to get saved data from localStorage
+            const savedName = localStorage.getItem('requesterName');
+            const savedSubteam = localStorage.getItem('requesterSubteam');
+
+            if (savedName) {
+                nameInput.value = savedName;
+            }
+            if (savedSubteam) {
+                subteamSelect.value = savedSubteam;
+            }
+
+            // Save data to localStorage whenever the user changes an input
+            nameInput.addEventListener('input', () => {
+                localStorage.setItem('requesterName', nameInput.value);
+            });
+            subteamSelect.addEventListener('change', () => {
+                localStorage.setItem('requesterSubteam', subteamSelect.value);
             });
         });
 
@@ -350,6 +401,9 @@
         document.getElementById("uploadForm").addEventListener("submit", async function(e) {
             e.preventDefault();
 
+            // UPDATED: Get references to all form fields
+            const nameInput = document.getElementById("name");
+            const subteamSelect = document.getElementById("subteam");
             const vendorSelect = document.getElementById("vendor");
             const messageDiv = document.getElementById("message");
             const submitBtn = document.getElementById("submitBtn");
@@ -368,13 +422,17 @@
             submitBtn.disabled = true;
 
             const formData = new FormData();
-            formData.append("file", file);
+            // UPDATED: Append new name and subteam data to the form
+            formData.append("name", nameInput.value);
+            formData.append("subteam", subteamSelect.value);
             formData.append("vendor", vendorSelect.value);
-            // const server_url = "https://baja-auto-order-d84add6a361b.herokuapp.com/request"
-            const server_url = "https://add.orionsoftware.systems/request"
-    
+            formData.append("file", file);
+            
+            const req_url = "https://baja-auto-order-d84add6a361b.herokuapp.com/request"
+            // const req_url = "https://add.orionsoftware.systems/request"
+        
             try {
-                const response = await fetch(server_url, {
+                const response = await fetch(req_url, {
                     method: "POST",
                     body: formData,
                 });
@@ -382,11 +440,13 @@
                 if (response.ok) {
                     messageDiv.className = 'message success';
                     messageDiv.textContent = "File uploaded successfully!";
-                    document.getElementById("uploadForm").reset();
+                    // Don't reset name and subteam, just the file input
+                    fileInput.value = ''; 
                     dropZonePrompt.innerHTML = 'Drag & Drop file or click to select'; // Reset prompt
                 } else {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
                     messageDiv.className = 'message error';
-                    messageDiv.textContent = `Upload failed. Server responded with status: ${response.status}`;
+                    messageDiv.textContent = `Upload failed: ${errorData.detail || response.statusText}`;
                 }
             } catch (error) {
                 messageDiv.className = 'message error';
